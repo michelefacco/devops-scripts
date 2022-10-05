@@ -1,6 +1,5 @@
 #!/opt/homebrew/bin/python3
 
-import json
 import boto3
 import argparse
 
