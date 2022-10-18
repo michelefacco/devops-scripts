@@ -39,17 +39,20 @@ def action(region):
                         for key in function['Environment']['Variables'].keys():
                             if value.upper() in key.upper() or value.upper() in function['Environment']['Variables'][key].upper():
                                 print('Function: {} - ENV ( {} = {} )'.format(function['FunctionName'], key, function['Environment']['Variables'][key]))
-                nested_response = clientLAMBDA.get_function(FunctionName = function['FunctionArn'])['Code']
-                if 'Location' in nested_response:
-                    filehandle, _ = urllib.request.urlretrieve(nested_response['Location'])
-                    with zipfile.ZipFile(filehandle, 'r') as zip_file_object:
-                        for filename in zip_file_object.namelist():
-                            if '/' not in filename:
-                                if '.py' in filename or '.js' in filename or '.json' in filename:
-                                    with zip_file_object.open(filename) as file:
-                                        content = str(file.read())
-                                        if value.upper() in content.upper():
-                                            print('Function: {} - FILE {}'.format(function['FunctionName'], filename))
+                if 'nodejs' in function['Runtime'] or 'python' in function['Runtime']:
+                    nested_response = clientLAMBDA.get_function(FunctionName = function['FunctionArn'])['Code']
+                    if 'Location' in nested_response:
+                        filehandle, _ = urllib.request.urlretrieve(nested_response['Location'])
+                        with zipfile.ZipFile(filehandle, 'r') as zip_file_object:
+                            for filename in zip_file_object.namelist():
+                                if '/' not in filename:
+                                    if '.py' in filename or '.js' in filename or '.json' in filename:
+                                        with zip_file_object.open(filename) as file:
+                                            content = str(file.read())
+                                            if value.upper() in content.upper():
+                                                print('Function: {} - FILE {}'.format(function['FunctionName'], filename))
+                else:
+                    print('Function: {} - Runtime {} is not supported by this script'.format(function['FunctionName'], function['Runtime']))
 
 for region in regions:
     try:
